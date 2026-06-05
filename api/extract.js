@@ -41,8 +41,8 @@ Output format:
   const cleanMime = mime === 'image/jpg' ? 'image/jpeg' : (mime || 'image/jpeg');
 
   try {
-    // Gọi thẳng đến endpoint API của Gemini 1.5 Flash (hoặc đổi thành gemini-2.5-flash nếu muốn dùng bản mới nhất)
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    // Gọi thẳng đến endpoint API của Gemini 2.5 Flash
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     
     const r = await fetch(url, {
       method: 'POST',
