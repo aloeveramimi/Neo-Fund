@@ -24,7 +24,8 @@ export default async function handler(req, res) {
       credentials: {
         client_email: clientEmail,
         // Sửa lỗi xuống dòng \n của chuỗi khóa bí mật private_key khi lưu trên Cloud Vercel
-        private_key: privateKey.replace(/\\n/g, '\n'),
+        // Dòng thông minh tự nhận diện mọi kiểu dán key trên Vercel không lo lỗi Decoder
+        private_key: privateKey.includes('\\n') ? privateKey.replace(/\\n/g, '\n') : privateKey,
       },
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
