@@ -6,9 +6,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { image, mime } = req.body;
-  // Giờ chúng ta sẽ dùng biến GEMINI_KEY thay vì ANTHROPIC_KEY
-  const apiKey = process.env.GEMINI_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'GEMINI_KEY not set in environment' });
+  // Chúng ta sẽ dùng biến OPENAI_KEY trên Vercel
+  const apiKey = process.env.OPENAI_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'OPENAI_KEY not set in environment' });
 
   const TYPES   = ['Income','Expense','Advance & Reimbursement','Adjustment'];
   const FROMS   = ['Treasury','Lisa','Bianca','Huck','Megan','TPBank','External'];
@@ -37,37 +37,35 @@ Rules:
 Output format:
 {"timestamp":"...","type":"...","from":"...","to":"...","category":"...","amount":0,"description":"...","method":"...","note":"..."}`;
 
-  // Chuẩn hóa định dạng Mime-type cho đúng chuẩn Google yêu cầu
   const cleanMime = mime === 'image/jpg' ? 'image/jpeg' : (mime || 'image/jpeg');
 
   try {
-    // Gọi thẳng đến endpoint API của Gemini 2.5 Flash
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    
-    const r = await fetch(url, {
+    // Gọi đến API của OpenAI bằng mô hình gpt-4o-mini siêu nhanh và rẻ
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
       body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: prompt },
-            { inlineData: { mimeType: cleanMime, data: image } }
+        model: 'gpt-4o-mini',
+        max_tokens: 1024,
+        response_format: { type: "json_object" }, // Ép ChatGPT trả về JSON chuẩn
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: `data:${cleanMime};base64,${image}` } }
           ]
-        }],
-        generationConfig: {
-          responseMimeType: "application/json" // Ép Gemini luôn trả về định dạng JSON chuẩn
-        }
+        }]
       })
     });
 
     const data = await r.json();
     if (data.error) return res.status(500).json({ error: data.error.message });
     
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    const match = rawText.match(/\{[\s\S]*\}/);
-    if (!match) return res.status(500).json({ error: 'No JSON found', raw: rawText });
-    
-    return res.status(200).json(JSON.parse(match[0]));
+    const rawText = data.choices?.[0]?.message?.content || '';
+    return res.status(200).json(JSON.parse(rawText));
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
