@@ -6,8 +6,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { image, mime } = req.body;
-  const apiKey = process.env.ANTHROPIC_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_KEY not set in environment' });
+  // Giờ chúng ta sẽ dùng biến GEMINI_KEY thay vì ANTHROPIC_KEY
+  const apiKey = process.env.GEMINI_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'GEMINI_KEY not set in environment' });
 
   const TYPES   = ['Income','Expense','Advance & Reimbursement','Adjustment'];
   const FROMS   = ['Treasury','Lisa','Bianca','Huck','Megan','TPBank','External'];
@@ -36,31 +37,36 @@ Rules:
 Output format:
 {"timestamp":"...","type":"...","from":"...","to":"...","category":"...","amount":0,"description":"...","method":"...","note":"..."}`;
 
+  // Chuẩn hóa định dạng Mime-type cho đúng chuẩn Google yêu cầu
+  const cleanMime = mime === 'image/jpg' ? 'image/jpeg' : (mime || 'image/jpeg');
+
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+    // Gọi thẳng đến endpoint API của Gemini 1.5 Flash (hoặc đổi thành gemini-2.5-flash nếu muốn dùng bản mới nhất)
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    
+    const r = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-opus-4-5',
-        max_tokens: 1024,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: mime || 'image/jpeg', data: image } },
-            { type: 'text', text: prompt }
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType: cleanMime, data: image } }
           ]
-        }]
+        }],
+        generationConfig: {
+          responseMimeType: "application/json" // Ép Gemini luôn trả về định dạng JSON chuẩn
+        }
       })
     });
+
     const data = await r.json();
     if (data.error) return res.status(500).json({ error: data.error.message });
-    const raw = data.content?.[0]?.text || '';
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) return res.status(500).json({ error: 'No JSON found', raw });
+    
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const match = rawText.match(/\{[\s\S]*\}/);
+    if (!match) return res.status(500).json({ error: 'No JSON found', raw: rawText });
+    
     return res.status(200).json(JSON.parse(match[0]));
   } catch (e) {
     return res.status(500).json({ error: e.message });
