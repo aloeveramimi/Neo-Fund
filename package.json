@@ -1,5 +1,11 @@
 {
   "name": "transaction-logger",
   "version": "1.0.0",
-  "private": true
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "@vercel/node": "^3.0.0",
+    "google-auth-library": "^9.0.0"
+  }
+
 }
