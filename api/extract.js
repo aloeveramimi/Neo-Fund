@@ -30,7 +30,10 @@ Rules:
   * Unknown recipient → "External"
 - category: one of ${JSON.stringify(CATS)} — guess from description
 - amount: plain integer only, no symbols, no dots, no commas (e.g. 35000)
-- description: ONLY the main purpose label, short and clean. E.g. "Tiền điện tháng 5", "Tiền nhà tháng 5", "Megan bún riêu". NO person name here.
+- description: STRICT RULE FOR DESCRIPTION:
+  * ONLY fill this field if the transaction is a MAJOR, PERIODIC, or FIXED budget item for the week or month.
+  * Examples of valid descriptions: "Tiền nhà tháng 5", "Tiền điện tháng 5", "Tiền nước tháng 5", "Tiền lãi tháng 5", "Tiền buff tuần 1", "Tiền quỹ tuần".
+  * If it is a regular daily purchase, small expense, or individual meal (e.g., buying banh mi, bún riêu, coffee, groceries, personal shopping), you MUST leave this field as an empty string "".
 - note: person name + item if relevant, e.g. "Bianca bánh canh". Empty string otherwise.
 - method: "Bank" for app/transfer, "Cash" for cash
 
