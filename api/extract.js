@@ -97,7 +97,7 @@ Output format:
               type: 'image_url', 
               image_url: { 
                 url: `data:${cleanMime};base64,${image}`,
-                detail: 'low' // ĐẶT DÒNG NÀY VÀO LÀ "WIN"
+              
               } 
             }
           ]
