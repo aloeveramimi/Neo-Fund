@@ -53,6 +53,10 @@ Strict Business Rules:
 8. Category Rules by Type:
    - If type is "Income" -> category MUST be "Contribution".
    - If type is "Expense" -> category can be ['Groceries','Food and Drinks','Coffee','Rent','Utilities','Transport','Work','Emergency','Misc','Health',"Huck's undefined expense"].
+     * STRICTION FOR EXPENSE CATEGORIZATION (CRITICAL FOR FOOD):
+     * If the transaction note/text mentions ready-to-eat snacks, cooked/boiled meals, street food, or immediate personal food (e.g., "khoai lang", "khoai luoc", "bun rieu", "banh canh", "com", "McDonalds") -> MUST categorize exactly as "Food and Drinks".
+     * If it mentions raw grocery items, market items, or raw ingredients for cooking (e.g., "mua rau", "thit", "trung", "di cho") -> MUST categorize as "Groceries".
+     * DO NOT lazily put food, snack, or meal items into "Misc". Only use "Misc" when the transaction truly does not fit any other option.
    - If type is "Advance & Reimbursement" -> category can be ['Transfer','Reward','Fine'].
 
 9. description: STRICT RULE FOR DESCRIPTION:
