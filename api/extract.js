@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: 'OPENAI_KEY not set in environment' });
 
   const TYPES   = ['Income','Expense','Advance & Reimbursement','Adjustment'];
-  const FROMS   = ['Treasury','Lisa','Bianca','Huck','Megan','TPBank','External'];
+  const FROMS   = ['Treasury','Lisa','Bianca','Huck','Megan','TPBank'];
   const TOS     = ['Treasury','Lisa','Bianca','Huck','Megan','External'];
   const CATS    = ['Contribution','Groceries','Food and Drinks','Coffee','Rent','Utilities','Transport','Work','Emergency','Misc','Transfer','Reward','Fine','Health',"Huck's undefined expense"];
   const METHODS = ['Cash','Bank'];
