@@ -65,10 +65,11 @@ Strict Business Rules:
 
 10. note: STRICT RULE FOR NOTE:
     - Format MUST ALWAYS be: [Mapped Member Name] + [specific item/reason/brand name].
-    - Mapped Member Name MUST ONLY be one of the group members who uploaded or made the transaction ("Megan", "Bianca", "Huck", "Lisa").
-    - CRITICAL: NEVER use the external recipient's real name (like "Hoang Thi Thom" or any vendor person name) in this field. 
-    - Correct Examples: "Megan khoai lang", "Megan bun rieu", "Bianca banh canh", "Lisa mua rau".
-
+    - Mapped Member Name MUST ONLY be the short name within the group ("Megan", "Bianca", "Huck", "Lisa").
+    - CRITICAL: NEVER include the member's real Vietnamese names or raw names from the screenshot (such as "Quynh huong", "Thuy Linh", "Quang Hoc", "Minh Giang"). Remove them completely from this field.
+    - Correct Examples: "Bianca pho", "Megan bún riêu", "Bianca bánh canh", "Lisa mua rau".
+    - Wrong Examples: "bianca quynh huong ck phở", "Megan Nguyen Thuy Linh ck khoai lang".
+    
 11. method: "Bank" for app/transfer, "Cash" for cash.
 
 Output format:
