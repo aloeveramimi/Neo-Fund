@@ -6,9 +6,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   const { image, mime } = req.body;
-  // Giờ chúng ta sẽ dùng biến GEMINI_KEY thay vì ANTHROPIC_KEY
-  const apiKey = process.env.GEMINI_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'GEMINI_KEY not set in environment' });
+  // Giờ bốc biến OPENAI_KEY trên Vercel ra xài
+  const apiKey = process.env.OPENAI_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'OPENAI_KEY not set in environment' });
 
   const TYPES   = ['Income','Expense','Advance & Reimbursement','Adjustment'];
   const FROMS   = ['Treasury','Lisa','Bianca','Huck','Megan','TPBank','External'];
@@ -30,47 +30,48 @@ Rules:
   * Unknown recipient → "External"
 - category: one of ${JSON.stringify(CATS)} — guess from description
 - amount: plain integer only, no symbols, no dots, no commas (e.g. 35000)
+
 - description: STRICT RULE FOR DESCRIPTION:
   * ONLY fill this field if the transaction is a MAJOR, PERIODIC, or FIXED budget item for the week or month.
   * Examples of valid descriptions: "Tiền nhà tháng 5", "Tiền điện tháng 5", "Tiền nước tháng 5", "Tiền lãi tháng 5", "Tiền buff tuần 1", "Tiền quỹ tuần".
-  * If it is a regular daily purchase, small expense, or individual meal (e.g., buying banh mi, bún riêu, coffee, groceries, personal shopping), you MUST leave this field as an empty string "".
-- note: person name + item if relevant, e.g. "Bianca bánh canh". Empty string otherwise.
+  * If it is a regular daily purchase, small expense, or individual meal (e.g., buying banh mi, bún riêu, coffee, groceries, personal shopping), you MUST leave this field as an empty string "". NO person names or small items here.
+
+- note: Fill this with the person name + specific item/reason if it is a regular or daily expense (e.g., "Megan bún riêu", "Bianca bánh canh", "Lisa mua rau"). If description above is already filled, you can leave this empty or add extra context.
+
 - method: "Bank" for app/transfer, "Cash" for cash
 
 Output format:
 {"timestamp":"...","type":"...","from":"...","to":"...","category":"...","amount":0,"description":"...","method":"...","note":"..."}`;
 
-  // Chuẩn hóa định dạng Mime-type cho đúng chuẩn Google yêu cầu
   const cleanMime = mime === 'image/jpg' ? 'image/jpeg' : (mime || 'image/jpeg');
 
   try {
-    // Gọi thẳng đến endpoint API của Gemini 2.5 Flash 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-    
-    const r = await fetch(url, {
+    // Gọi trực tiếp đến API Vision của OpenAI bằng model gpt-4o-mini siêu rẻ
+    const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
       body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: prompt },
-            { inlineData: { mimeType: cleanMime, data: image } }
+        model: 'gpt-4o-mini',
+        max_tokens: 1024,
+        response_format: { type: "json_object" }, // Ép ChatGPT luôn trả về JSON sạch chỉnh chu
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            { type: 'image_url', image_url: { url: `data:${cleanMime};base64,${image}` } }
           ]
-        }],
-        generationConfig: {
-          responseMimeType: "application/json" // Ép Gemini luôn trả về định dạng JSON chuẩn
-        }
+        }]
       })
     });
 
     const data = await r.json();
-    if (data.error) return res.status(500).json({ error: data.error.message });
+    if (data.error) return res.status(500).json({ error: data.error.message || data.error });
     
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    const match = rawText.match(/\{[\s\S]*\}/);
-    if (!match) return res.status(500).json({ error: 'No JSON found', raw: rawText });
-    
-    return res.status(200).json(JSON.parse(match[0]));
+    const rawText = data.choices?.[0]?.message?.content || '';
+    return res.status(200).json(JSON.parse(rawText));
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
