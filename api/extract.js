@@ -13,7 +13,6 @@ export default async function handler(req, res) {
   const FROMS   = ['Treasury','Lisa','Bianca','Huck','Megan','TPBank']; 
   const TOS     = ['Treasury','Lisa','Bianca','Huck','Megan','External'];
   const CATS    = ['Contribution','Groceries','Food and Drinks','Coffee','Rent','Utilities','Transport','Work','Emergency','Misc','Transfer','Reward','Fine','Health',"Huck's undefined expense"];
-  const METHODS = ['Cash','Bank'];
 
   const prompt = `Extract the bank transfer details from this screenshot.
 The person uploading this screenshot right now is: "${userSelected || 'Unknown'}".
@@ -84,7 +83,13 @@ Output format:
           role: 'user',
           content: [
             { type: 'text', text: prompt },
-            { type: 'image_url', image_url: { url: `data:${cleanMime};base64,${image}` } }
+            { 
+              type: 'image_url', 
+              image_url: { 
+                url: `data:${cleanMime};base64,${image}`,
+                detail: 'low' // ĐÃ ÉP SỬ DỤNG CHẾ ĐỘ TIẾT KIỆM - CHỈ 85 TOKENS CHO 1 ẢNH!
+              } 
+            }
           ]
         }]
       })
