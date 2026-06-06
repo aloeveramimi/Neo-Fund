@@ -7,10 +7,12 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { sheetId, sheetName = 'Log', row } = req.body;
-  if (!sheetId) return res.status(400).json({ error: 'Missing sheetId' });
+  const { sheetName = 'Log', row } = req.body;
 
-  // Bốc thông tin Service Account từ biến môi trường Vercel ra
+  // Gọi mã ID từ biến môi trường Vercel ra xài
+  const sheetId = process.env.SPREADSHEET_ID;
+  if (!sheetId) return res.status(400).json({ error: 'Missing SPREADSHEET_ID in Vercel Environment Variables' });
+
   const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
   const privateKey = process.env.GOOGLE_PRIVATE_KEY;
 
@@ -19,27 +21,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Tự động cấu hình xác thực bằng thông tin con Bot Service Account
     const auth = new GoogleAuth({
       credentials: {
         client_email: clientEmail,
-        // Sửa lỗi xuống dòng \n của chuỗi khóa bí mật private_key khi lưu trên Cloud Vercel
-        // Dòng thông minh tự nhận diện mọi kiểu dán key trên Vercel không lo lỗi Decoder
         private_key: privateKey.includes('\\n') ? privateKey.replace(/\\n/g, '\n') : privateKey,
       },
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
 
-    // Tạo mã Access Token cấp quyền từ Google để đi làm việc với Google Sheet
     const client = await auth.getClient();
     const tokenResponse = await client.getAccessToken();
     const accessToken = tokenResponse.token;
 
     const range = encodeURIComponent(`${sheetName}!A1`);
-    // Sử dụng endpoint chuẩn của Google API và loại bỏ tham số &key=${gKey} cũ bị từ chối
     const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
 
-    // Gọi API của Google kèm mã Access Token quyền Editor trong Header
     const r = await fetch(url, {
       method: 'POST',
       headers: { 
