@@ -25,9 +25,10 @@ Strict Business Rules:
    - Check if money is flowing INTO the fund or OUT of the fund/wallet.
    - If a member is sending money to the fund (e.g. Contribution / Đóng quỹ) -> Set type to "Income".
    - If a member is buying something or paying for general things -> Set type to "Expense".
-3. from: One of ${JSON.stringify(FROMS)}. (STRICT: "External" is NOT allowed in this field).
-   - If the screenshot shows money being sent from a specific member or if type is "Income" uploaded by a member -> "from" MUST be that member's mapped name ("Megan", "Bianca", "Huck", "Lisa").
-   - If money is sent from the main official fund account (TPBank) -> "from" MUST be "Treasury".
+3.  from: One of ${JSON.stringify(FROMS)}. (STRICT: "External" is NOT allowed in this field).
+    - GENERAL RULE: The "from" field MUST STRICTLY MATCH the person currently uploading this screenshot ("${userSelected || 'Unknown'}"). Trust the uploader's identity above everything else.
+    - FOR EXPENSE & INCOME: Whether it's a member paying for a group meal (Expense), a member transferring money into the fund (Income), or Treasury logging an official transaction, "from" is ALWAYS the exact value of "${userSelected}".
+    - CRITICAL CONTEXT FILTER: Even if other member names (like "Huck", "Megan", "Bianca") appear in the transfer description or transaction note because they ate together, NEVER change the "from" field to those mentioned names. The person who holds the "I am" status is the absolute owner who initiated the transaction.
 4. to: One of ${JSON.stringify(TOS)}.
    - If money is coming into the fund account -> "to" MUST be "Treasury".
    - If money is spent at a public shop/vendor -> "to" MUST be "External".
