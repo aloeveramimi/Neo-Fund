@@ -39,8 +39,6 @@ input:focus, select:focus { border-color: #7F77DD; }
 .sp { display:inline-block; width:11px; height:11px; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin .7s linear infinite; margin-right:6px; vertical-align:-1px; }
 @keyframes spin { to { transform:rotate(360deg); } }
 .note-sm { font-size:11px; color:#bbb; margin-top:3px; line-height:1.4; }
-a { color:#7F77DD; }
-.setup-link { font-size:12px; color:#888; text-align:center; margin-top:4px; }
 </style>
 </head>
 <body>
@@ -48,17 +46,17 @@ a { color:#7F77DD; }
 <h1>💸 Transaction Logger</h1>
 
 <div class="card" id="configCard">
-  <div class="lbl">Config</div>
-  <div style="margin-bottom:10px">
-    <div style="font-size:12px;color:#777">Google Sheet ID</div>
-    <input type="text" id="sheetId" placeholder="Lấy từ URL của sheet">
-    <div class="note-sm">docs.google.com/spreadsheets/d/<b style="color:#534AB7">SHEET_ID</b>/edit</div>
-  </div>
-  <div style="display:flex;gap:8px">
-    <div style="flex:1">
-      <div style="font-size:12px;color:#777">Tab name</div>
-      <input type="text" id="sheetName" value="Log">
-    </div>
+  <div class="lbl">Phân quyền tài khoản</div>
+  <div>
+    <div style="font-size:12px;color:#777; font-weight:600;">I am (Bạn là ai?)</div>
+    <select id="userRole" onchange="updateTabNotice()">
+      <option value="Megan">Megan</option>
+      <option value="Bianca">Bianca</option>
+      <option value="Huck">Huck</option>
+      <option value="Lisa">Lisa</option>
+      <option value="Treasury">Treasury (Quản lý Quỹ)</option>
+    </select>
+    <div class="note-sm" id="tabNotice">Sẵn sàng phân tích luồng hóa đơn...</div>
   </div>
 </div>
 
@@ -88,7 +86,7 @@ a { color:#7F77DD; }
 
 <script>
 const TYPES   = ['Income','Expense','Advance & Reimbursement','Adjustment'];
-const FROMS   = ['Treasury','Lisa','Bianca','Huck','Megan','TPBank','External'];
+const FROMS   = ['Treasury','Lisa','Bianca','Huck','Megan','TPBank']; // ĐÃ BỎ EXTERNAL KHỎI LIST FROM
 const TOS     = ['Treasury','Lisa','Bianca','Huck','Megan','External'];
 const CATS    = ['Contribution','Groceries','Food and Drinks','Coffee','Rent','Utilities','Transport','Work','Emergency','Misc','Transfer','Reward','Fine','Health',"Huck's undefined expense"];
 const METHODS = ['Cash','Bank'];
@@ -96,11 +94,28 @@ const METHODS = ['Cash','Bank'];
 let b64=null, mime='image/jpeg', ex={};
 
 window.addEventListener('load',()=>{
-  ['sheetId','sheetName'].forEach(id=>{
-    const v=localStorage.getItem('tl_'+id); if(v) document.getElementById(id).value=v;
-    document.getElementById(id).addEventListener('input',function(){ localStorage.setItem('tl_'+id,this.value); });
+  const savedRole = localStorage.getItem('tl_userRole');
+  if(savedRole) document.getElementById('userRole').value = savedRole;
+  updateTabNotice();
+  document.getElementById('userRole').addEventListener('change', function() {
+    localStorage.setItem('tl_userRole', this.value);
+    updateTabNotice();
   });
 });
+
+function updateTabNotice() {
+  const role = document.getElementById('userRole').value;
+  if(ex.type) {
+    if(ex.type === 'Income' || ex.type === 'Advance & Reimbursement') {
+      document.getElementById('tabNotice').innerHTML = `Giao dịch song phương: Tự động ghi vào cả <b style="color:#534AB7">Member</b> & <b style="color:#534AB7">Treasury</b>`;
+    } else {
+      const target = (role === 'Treasury') ? 'Treasury' : 'Member';
+      document.getElementById('tabNotice').innerHTML = `Giao dịch đơn phương: Sẽ ghi vào trang <b style="color:#534AB7">${target}</b>`;
+    }
+  } else {
+    document.getElementById('tabNotice').innerHTML = `Sẵn sàng phân tích luồng hóa đơn...`;
+  }
+}
 
 const dz=document.getElementById('dz');
 dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag');});
@@ -120,6 +135,8 @@ function load(file){
     document.getElementById('exCard').style.display='none';
     document.getElementById('subBtn').style.display='none';
     setStatus('');
+    ex={};
+    updateTabNotice();
   };
   r.readAsDataURL(file);
 }
@@ -133,19 +150,21 @@ function setStatus(msg,type='sl'){
 
 async function scan(){
   if(!b64)return;
+  const userSelected = document.getElementById('userRole').value;
   document.getElementById('scanBtn').disabled=true;
   setStatus('Đang đọc screenshot…');
   try{
     const res=await fetch('/api/extract',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({image:b64,mime})
+      body:JSON.stringify({image:b64,mime,userSelected})
     });
     const data=await res.json();
     if(data.error){setStatus('Lỗi: '+data.error,'se');document.getElementById('scanBtn').disabled=false;return;}
     ex=data; renderFields();
     document.getElementById('exCard').style.display='block';
     document.getElementById('subBtn').style.display='block';
+    updateTabNotice();
     setStatus('');
   }catch(e){setStatus('Lỗi kết nối: '+e.message,'se');}
   document.getElementById('scanBtn').disabled=false;
@@ -153,7 +172,7 @@ async function scan(){
 
 function renderFields(){
   const f=document.getElementById('fields');
-  const sel=(n,v,opts)=>`<select onchange="ex['${n}']=this.value">${opts.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
+  const sel=(n,v,opts)=>`<select onchange="ex['${n}']=this.value; if('${n}'==='type') updateTabNotice();">${opts.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
   const inp=(n,v)=>`<input type="text" value="${String(v||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}" oninput="ex['${n}']=this.value">`;
   f.innerHTML=[
     row('Timestamp', inp('timestamp',ex.timestamp)),
@@ -170,27 +189,44 @@ function renderFields(){
 function row(l,c){return `<div class="field-row"><span class="fl">${l}</span><span class="fv">${c}</span></div>`;}
 
 async function submitRow(){
-  const sheetId=document.getElementById('sheetId').value.trim();
-  const sheetName=document.getElementById('sheetName').value.trim()||'Log';
-  if(!sheetId){setStatus('Điền Sheet ID nhé.','se');return;}
+  const role = document.getElementById('userRole').value;
   if(!ex.timestamp){setStatus('Chưa đọc gì cả, scan trước đi.','se');return;}
+  
   document.getElementById('subBtn').disabled=true;
   setStatus('Đang ghi vào sheet…');
+  
   const rowVals=[
     ex.timestamp||'','','',
     ex.type||'',ex.from||'',ex.to||'',ex.category||'',
     ex.amount||'',ex.description||'',ex.method||'',ex.note||''
   ];
-  try{
-    const res=await fetch('/api/append',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({sheetId,sheetName,row:rowVals})
-    });
-    const data=await res.json();
-    if(data.error) setStatus('Sheets lỗi: '+data.error,'se');
-    else setStatus('✅ Đã thêm vào sheet!','ss');
-  }catch(e){setStatus('Lỗi: '+e.message,'se');}
+
+  // LOGIC ĐỊNH TUYẾN TAB THÔNG MINH
+  let targetSheets = [];
+  if (ex.type === 'Income' || ex.type === 'Advance & Reimbursement') {
+    targetSheets = ['Member', 'Treasury']; // Ghi đồng thời vào cả 2 bảng
+  } else {
+    targetSheets = [(role === 'Treasury') ? 'Treasury' : 'Member']; // Chỉ ghi vào bảng của người up
+  }
+
+  try {
+    for (let sheetName of targetSheets) {
+      const res = await fetch('/api/append',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({sheetName,row:rowVals})
+      });
+      const data = await res.json();
+      if(data.error) {
+        setStatus(`Lỗi khi lưu vào tab ${sheetName}: ` + data.error,'se');
+        document.getElementById('subBtn').disabled=false;
+        return;
+      }
+    }
+    setStatus('✅ Đã thêm thành công vào Google Sheet!','ss');
+  } catch(e) {
+    setStatus('Lỗi: '+e.message,'se');
+  }
   document.getElementById('subBtn').disabled=false;
 }
 </script>
