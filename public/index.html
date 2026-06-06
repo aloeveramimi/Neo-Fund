@@ -124,21 +124,47 @@ dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');co
 document.getElementById('fi').addEventListener('change',function(){if(this.files[0])load(this.files[0]);});
 
 function load(file){
-  mime=file.type||'image/jpeg'; if(mime==='image/jpg')mime='image/jpeg';
-  const r=new FileReader();
-  r.onload=e=>{
-    const d=e.target.result, m=d.match(/^data:(image\/[a-zA-Z+]+);base64,/);
-    if(m){mime=m[1]; if(mime==='image/jpg')mime='image/jpeg';}
-    b64=d.split(',')[1];
-    const p=document.getElementById('prev'); p.src=d; p.style.display='block';
-    document.getElementById('scanBtn').style.display='block';
-    document.getElementById('exCard').style.display='none';
-    document.getElementById('subBtn').style.display='none';
-    setStatus('');
-    ex={};
-    updateTabNotice();
+  mime = file.type || 'image/jpeg';
+  if(mime === 'image/jpg') mime = 'image/jpeg';
+  
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const img = new Image();
+    img.onload = () => {
+      // TỰ CHẾ CHẾ ĐỘ MID: ÉP ĐỘ PHÂN GIẢI VỀ MỨC VỪA ĐỦ ĐỌC
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Đặt chiều rộng tiêu chuẩn lý tưởng cho OpenAI hệ High là 768px
+      const TARGET_WIDTH = 768; 
+      const scale = TARGET_WIDTH / img.width;
+      
+      // Tính toán tỷ lệ chiều cao chạy theo để ảnh không bị bóp méo
+      canvas.width = TARGET_WIDTH;
+      canvas.height = img.height * scale;
+      
+      // Vẽ ảnh thu nhỏ vào canvas
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // Xuất chuỗi Base64 đã được nén giảm tải dung lượng pixel
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8); // Chất lượng 80% nét căng
+      b64 = compressedDataUrl.split(',')[1];
+      
+      // Hiển thị giao diện xem trước
+      const p = document.getElementById('prev'); 
+      p.src = compressedDataUrl; 
+      p.style.display = 'block';
+      
+      document.getElementById('scanBtn').style.display = 'block';
+      document.getElementById('exCard').style.display = 'none';
+      document.getElementById('subBtn').style.display = 'none';
+      setStatus('');
+      ex = {};
+      updateTabNotice();
+    };
+    img.src = event.target.result;
   };
-  r.readAsDataURL(file);
+  reader.readAsDataURL(file);
 }
 
 function setStatus(msg,type='sl'){
