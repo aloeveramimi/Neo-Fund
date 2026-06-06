@@ -49,7 +49,7 @@ Strict Business Rules:
    - Recipient "Cong ty tnhh tai minh khang" -> note MUST contain "Bon Bon", category is "Food and Drinks" or "Coffee".
    - Recipient "McDonalds" -> note MUST contain "McDonalds", category is "Food and Drinks".
    - Recipient "Go Da lat" AND amount is exactly 12300 -> note MUST contain "sữa để uống coffee", category is "Coffee".
-   - Any transaction text mentioning "atiso" or "langfarm", category is "Health".
+   - If the transaction text/context mentions "atiso" or "langfarm" and is related to "Huck" (e.g., uploaded by Huck, context for Huck) , category is "Health".
 
 8. Category Rules by Type:
    - If type is "Income" -> category MUST be "Contribution".
