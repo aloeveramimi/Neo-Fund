@@ -63,7 +63,11 @@ Strict Business Rules:
    - ONLY fill this field if the transaction is a MAJOR, PERIODIC, or FIXED budget item for the week or month (e.g., "Tiền nhà tháng 5", "Tiền điện tháng 5", "Tiền nước tháng 5", "Tiền lãi tháng 5", "Tiền buff tuần 1", "Tiền quỹ tuần").
    - If it is a regular daily purchase or individual meal, leave this field as an empty string "".
 
-10. note: Fill this with the person name + specific item/reason (e.g., "Megan bún riêu", "Bianca đóng quỹ tuần 2"). Incorporate Brand Memory rules if applicable.
+10. note: STRICT RULE FOR NOTE:
+    - Format MUST ALWAYS be: [Mapped Member Name] + [specific item/reason/brand name].
+    - Mapped Member Name MUST ONLY be one of the group members who uploaded or made the transaction ("Megan", "Bianca", "Huck", "Lisa").
+    - CRITICAL: NEVER use the external recipient's real name (like "Hoang Thi Thom" or any vendor person name) in this field. 
+    - Correct Examples: "Megan khoai lang", "Megan bun rieu", "Bianca banh canh", "Lisa mua rau".
 
 11. method: "Bank" for app/transfer, "Cash" for cash.
 
