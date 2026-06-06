@@ -95,7 +95,7 @@ Output format:
               type: 'image_url', 
               image_url: { 
                 url: `data:${cleanMime};base64,${image}`,
-                detail: 'low' // ĐÃ ÉP SỬ DỤNG CHẾ ĐỘ TIẾT KIỆM - CHỈ 85 TOKENS CHO 1 ẢNH!
+        
               } 
             }
           ]
