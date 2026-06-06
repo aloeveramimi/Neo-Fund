@@ -5,40 +5,64 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { image, mime } = req.body;
-  // Giờ bốc biến OPENAI_KEY trên Vercel ra xài
+  const { image, mime, userSelected } = req.body;
   const apiKey = process.env.OPENAI_KEY;
   if (!apiKey) return res.status(500).json({ error: 'OPENAI_KEY not set in environment' });
 
   const TYPES   = ['Income','Expense','Advance & Reimbursement','Adjustment'];
-  const FROMS   = ['Treasury','Lisa','Bianca','Huck','Megan','TPBank'];
+  const FROMS   = ['Treasury','Lisa','Bianca','Huck','Megan','TPBank']; 
   const TOS     = ['Treasury','Lisa','Bianca','Huck','Megan','External'];
   const CATS    = ['Contribution','Groceries','Food and Drinks','Coffee','Rent','Utilities','Transport','Work','Emergency','Misc','Transfer','Reward','Fine','Health',"Huck's undefined expense"];
   const METHODS = ['Cash','Bank'];
 
   const prompt = `Extract the bank transfer details from this screenshot.
+The person uploading this screenshot right now is: "${userSelected || 'Unknown'}".
+
 Reply with ONLY a raw JSON object — no markdown, no backticks, no explanation.
 
-Rules:
-- timestamp: "DD/MM/YYYY HH:MM:SS" using the time shown
-- type: one of ${JSON.stringify(TYPES)} — if description/note says "Expense" use that
-- from: one of ${JSON.stringify(FROMS)}
-  * The account owner sending money → "Treasury"
-  * Money coming in from outside → "External"
-- to: one of ${JSON.stringify(TOS)}
-  * Match recipient name to known people if possible: Le Thi Thao = Megan, etc.
-  * Unknown recipient → "External"
-- category: one of ${JSON.stringify(CATS)} — guess from description
-- amount: plain integer only, no symbols, no dots, no commas (e.g. 35000)
+Strict Business Rules:
+1. timestamp: "DD/MM/YYYY HH:MM:SS" using the time shown. If HH:MM:SS is missing or cropped from the screenshot, use the transaction date + "00:00:00".
+2. type: One of ${JSON.stringify(TYPES)}.
+   - Check if money is flowing INTO the fund or OUT of the fund/wallet.
+   - If a member is sending money to the fund (e.g. Contribution / Đóng quỹ) -> Set type to "Income".
+   - If a member is buying something or paying for general things -> Set type to "Expense".
+3. from: One of ${JSON.stringify(FROMS)}. (STRICT: "External" is NOT allowed in this field).
+   - If the screenshot shows money being sent from a specific member or if type is "Income" uploaded by a member -> "from" MUST be that member's mapped name ("Megan", "Bianca", "Huck", "Lisa").
+   - If money is sent from the main official fund account (TPBank) -> "from" MUST be "Treasury".
+4. to: One of ${JSON.stringify(TOS)}.
+   - If money is coming into the fund account -> "to" MUST be "Treasury".
+   - If money is spent at a public shop/vendor -> "to" MUST be "External".
+5. amount: Plain integer only, no currency symbols, no dots, no commas (e.g. 35000).
 
-- description: STRICT RULE FOR DESCRIPTION:
-  * ONLY fill this field if the transaction is a MAJOR, PERIODIC, or FIXED budget item for the week or month.
-  * Examples of valid descriptions: "Tiền nhà tháng 5", "Tiền điện tháng 5", "Tiền nước tháng 5", "Tiền lãi tháng 5", "Tiền buff tuần 1", "Tiền quỹ tuần".
-  * If it is a regular daily purchase, small expense, or individual meal (e.g., buying banh mi, bún riêu, coffee, groceries, personal shopping), you MUST leave this field as an empty string "". NO person names or small items here.
+6. Name & Bank Mapping Rules (Convert real Vietnamese names from screenshot):
+   - "Nguyen Thuy Linh" -> Megan
+   - "Duong Quynh Huong" -> Bianca
+   - "Do Quang Hoc" -> Huck
+   - "Duong Minh Giang" OR "Miami Yogurt" OR "Lisa":
+     * IF the bank brand shown on the screenshot is "TPBank" -> Map exactly to "Treasury" (Official Fund Account).
+     * IF the bank brand is ANY OTHER BANK (e.g. Vietcombank, Techcombank, MB Bank...) -> Map to "Lisa" (Personal Account).
 
-- note: Fill this with the person name + specific item/reason if it is a regular or daily expense (e.g., "Megan bún riêu", "Bianca bánh canh", "Lisa mua rau"). If description above is already filled, you can leave this empty or add extra context.
+7. Brand Memory & Context Mapping Rules (Save short shop name to "note" and assign correct "category"):
+   - Recipient "Cong ty TNHH thuc pham Nguyen Nhi" -> note MUST contain "BMTT (bánh mì thảnh thơi)", category is "Coffee".
+   - Recipient "Baci" -> note MUST contain "Baci coffee", category is "Coffee".
+   - Recipient "Cong ty moon dining" -> note MUST contain "coffee moon dining", category is "Coffee".
+   - Recipient "Tran Trung Cang" -> note MUST contain "vé Sinh cafe (xe buýt)", category is "Transport".
+   - Recipient "Cong ty tnhh tai minh khang" -> note MUST contain "Bon Bon", category is "Food and Drinks" or "Coffee".
+   - Recipient "McDonalds" -> note MUST contain "McDonalds", category is "Food and Drinks".
+   - Recipient "Go Da lat" AND amount is exactly 12300 -> note MUST contain "sữa để uống coffee", category is "Coffee".
 
-- method: "Bank" for app/transfer, "Cash" for cash
+8. Category Rules by Type:
+   - If type is "Income" -> category MUST be "Contribution".
+   - If type is "Expense" -> category can be ['Groceries','Food and Drinks','Coffee','Rent','Utilities','Transport','Work','Emergency','Misc','Health',"Huck's undefined expense"].
+   - If type is "Advance & Reimbursement" -> category can be ['Transfer','Reward','Fine'].
+
+9. description: STRICT RULE FOR DESCRIPTION:
+   - ONLY fill this field if the transaction is a MAJOR, PERIODIC, or FIXED budget item for the week or month (e.g., "Tiền nhà tháng 5", "Tiền điện tháng 5", "Tiền nước tháng 5", "Tiền lãi tháng 5", "Tiền buff tuần 1", "Tiền quỹ tuần").
+   - If it is a regular daily purchase or individual meal, leave this field as an empty string "".
+
+10. note: Fill this with the person name + specific item/reason (e.g., "Megan bún riêu", "Bianca đóng quỹ tuần 2"). Incorporate Brand Memory rules if applicable.
+
+11. method: "Bank" for app/transfer, "Cash" for cash.
 
 Output format:
 {"timestamp":"...","type":"...","from":"...","to":"...","category":"...","amount":0,"description":"...","method":"...","note":"..."}`;
@@ -46,7 +70,6 @@ Output format:
   const cleanMime = mime === 'image/jpg' ? 'image/jpeg' : (mime || 'image/jpeg');
 
   try {
-    // Gọi trực tiếp đến API Vision của OpenAI bằng model gpt-4o-mini siêu rẻ
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -56,7 +79,7 @@ Output format:
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         max_tokens: 1024,
-        response_format: { type: "json_object" }, // Ép ChatGPT luôn trả về JSON sạch chỉnh chu
+        response_format: { type: "json_object" },
         messages: [{
           role: 'user',
           content: [
