@@ -67,7 +67,7 @@ Strict Business Rules:
 
 10. note: Fill this with the mapped name of the members involved + specific item/reason (e.g., "Megan bún riêu").
     - CRITICAL RULE FOR MULTIPLE MEMBERS: If the screenshot text or transaction note mentions multiple people from the group (e.g., "bianca + megan + Huck phở", "Huck Megan coffee", "Bianca mua com cho ca team"), you MUST include ALL of their mapped names in this field, separated by a plus sign "+".
-    - Example for multiple people: "Bianca + Megan + Huck phở", "Huck + Megan coffee".
+    - NO AUTOMATIC SUBSTITUTION: Do NOT automatically replace or substitute the names written on the bill with the uploader's name ("${userSelected}"). Only include the uploader's name if they are explicitly mentioned in the screenshot text along with the others.
     - CRITICAL: NEVER include the member's real Vietnamese names from the screenshot (like "Duong Quynh Huong", "Nguyen Thuy Linh", etc.) or any outside stranger's name here. ONLY use the short mapped names ("Megan", "Bianca", "Huck", "Lisa").
     - Incorporate Brand Memory rules if applicable.
     
