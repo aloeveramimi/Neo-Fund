@@ -12,8 +12,8 @@ export default async function handler(req, res) {
 
   // 1. CẤU HÌNH CỨNG MÃ GID CỦA FILE GOOGLE SHEETS CỦA BẠN VÀO ĐÂY
   // (Bạn mở Sheet lên, bấm vào từng tab rồi copy dãy số sau chữ gid= trên đường link URL nha)
-  const GID_MEMBER = "THAY_SỐ_GID_TAB_MEMBER_VÀO_ĐÂY"; 
-  const GID_TREASURY = "THAY_SỐ_GID_TAB_TREASURY_VÀO_ĐÂY";
+  const GID_MEMBER = "1444019689"; 
+  const GID_TREASURY = "0";
 
   // Gọi mã ID từ biến môi trường Vercel ra xài
   const sheetId = process.env.SPREADSHEET_ID;
