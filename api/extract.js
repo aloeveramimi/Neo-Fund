@@ -25,10 +25,14 @@ Strict Business Rules:
    - Check if money is flowing INTO the fund or OUT of the fund/wallet.
    - If a member is sending money to the fund (e.g. Contribution / Đóng quỹ) -> Set type to "Income".
    - If a member is buying something or paying for general things -> Set type to "Expense".
-3.  from: One of ${JSON.stringify(FROMS)}. (STRICT: "External" is NOT allowed in this field).
-    - GENERAL RULE: The "from" field MUST STRICTLY MATCH the person currently uploading this screenshot ("${userSelected || 'Unknown'}"). Trust the uploader's identity above everything else.
-    - FOR EXPENSE & INCOME: Whether it's a member paying for a group meal (Expense), a member transferring money into the fund (Income), or Treasury logging an official transaction, "from" is ALWAYS the exact value of "${userSelected}".
-    - CRITICAL CONTEXT FILTER: Even if other member names (like "Huck", "Megan", "Bianca") appear in the transfer description or transaction note because they ate together, NEVER change the "from" field to those mentioned names. The person who holds the "I am" status is the absolute owner who initiated the transaction.
+3. from: One of ${JSON.stringify(FROMS)}. (STRICT: "External" is NOT allowed in this field).
+- CASE 1: TRANSACTION TYPE IS "INCOME" (Contribution, đóng quỹ, nạp tiền vào quỹ):
+  + AI MUST look closely at the screenshot to identify who the actual sender/depositor is. Map their real Vietnamese name to their short name (e.g., "Duong Quynh Huong" -> "Bianca", "Do Quang Hoc" -> "Huck", "Megan" -> "Megan").
+  + DO NOT blindly use "${userSelected}" for Income if "${userSelected}" is "Treasury" or the admin, because the admin might be uploading the receipt on behalf of another member.
+
+- CASE 2: TRANSACTION TYPE IS "EXPENSE" (Chi tiêu, ăn uống, mua sắm lặt vặt):
+  + The "from" field MUST MATCH the person uploading this screenshot ("${userSelected || 'Unknown'}").
+  + CRITICAL: Even if other member names (like "Huck", "Megan") appear in the transfer text or transaction note because they ate together, the "from" field MUST still be the uploader ("${userSelected}") because they are the one who actually paid out of their pocket.
 4. to: One of ${JSON.stringify(TOS)}.
    - If money is coming into the fund account -> "to" MUST be "Treasury".
    - If money is spent at a public shop/vendor -> "to" MUST be "External".
