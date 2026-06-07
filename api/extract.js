@@ -67,15 +67,23 @@ Strict Business Rules:
    - ONLY fill this field if the transaction is a MAJOR, PERIODIC, or FIXED budget item for the week or month (e.g., "Tiền nhà tháng 5", "Tiền điện tháng 5", "Tiền nước tháng 5", "Tiền lãi tháng 5", "Tiền buff tuần 1", "Tiền quỹ tuần").
    - If it is a regular daily purchase or individual meal, leave this field as an empty string "".
 
-10. note: Fill this with the target merchant, item purpose, or group member short names if explicitly mentioned (e.g., "Highlands", "coffee", "Bianca: phở").
-    - NO GUESSWORK FROM UPLOADER: If the transaction text/description contains ONLY machine codes, transaction numbers, automatic bank text, or POS terminal IDs (like random Highlands/Starbucks codes) and does NOT explicitly contain any member's name, you MUST NOT insert the uploader's name ("${userSelected}") or assume they are the one involved.
-    - WHAT TO OUTPUT FOR CODE-ONLY BILLS: For bills with no clear person names, ONLY output the clean merchant/brand name or item purpose if visible (e.g., "Highlands Coffee", "Starbucks", "coffee"). If even the brand is unreadable and there are only pure codes, return an empty string "" so the user can manually fill the name later. 
-      * Strict Example: If the bill is from Highlands Coffee but the transaction content is just a code and the uploader is Megan, the note MUST be exactly "Highlands Coffee" or "coffee", NOT "Megan: coffee" and NOT "Megan".
-    - MAP GROUP NAMES ONLY: Look for names in the text, sender, or recipient fields ONLY to map your group members ("Megan", "Bianca", "Huck", "Lisa", "Treasury") using Rule 6.
-    - NO STRANGER PERSONAL NAMES: NEVER include the real Vietnamese personal name of an outside individual stranger or shop owner (such as "Tran Trung Cang") inside the note.
-    - MULTIPLE MEMBERS FORMATTING RULE: If the text clearly indicates 2 or more group members eating together, strictly format as: [Name] + [Name] + [Name]: [reason] (e.g., "Bianca + Megan: phở").
-    - CRITICAL FOR INCOME/CONTRIBUTIONS: If the transaction is "Income" and the sender is "Duong Quynh Huong", the note MUST be "Bianca đóng quỹ".
-    - STRICT SECURITY CHOP: NEVER include any member's real Vietnamese names from the screenshot (like "Duong Quynh Huong", "Nguyen Thuy Linh", "Duong Minh Giang", etc.).
+10. note: Fill this with the mapped name of the members involved + specific item/reason (e.g., "Megan bún riêu").
+    - MAP REAL NAMES TO SHORT NAMES: Look at the names in the transaction text, sender name, or recipient name. ALWAYS convert them to their short English mapped names ("Megan", "Bianca", "Huck", "Lisa", "Treasury") using the rules from Rule 6. 
+    - MERCHANT BRAND MEMORY & COMPANY MAPPING: If the recipient name or transaction text mentions corporate or legal merchant names, map them immediately to their brand names and include them in the note:
+      * "TNHH NGUYEN NHI" or "NGUYEN NHI" -> MUST output "BMTT" (Bánh mì thảnh thơi). Do NOT treat this as an individual stranger's name, keep it!
+      * "Baci" -> MUST output "Baci coffee".
+      * "Cong ty moon dining" -> MUST output "coffee moon dining".
+      * "Tran Trung Cang" -> MUST output "vé Sinh cafe (xe buýt)".
+      * "Cong ty tnhh tai minh khang" -> MUST output "Bon Bon".
+      * "McDonalds" -> MUST output "McDonalds".
+    - NO STRANGER PERSONAL NAMES: NEVER include the real Vietnamese personal name of an outside individual stranger or shop owner (such as "Nguyen Van A", "Tran Thi B", etc.) inside the note. Only group member short names, recognized brand names (like BMTT, McDonalds, Highlands), or item purposes are allowed.
+    - CRITICAL FOR INCOME/CONTRIBUTIONS: If the transaction is "Income" and the sender is "Duong Quynh Huong", the note MUST be "Bianca đóng quỹ" (or the reason shown). NEVER write "Duong Minh Giang" or "Lisa" here just because she is the uploader or the recipient.
+    - MULTIPLE MEMBERS FORMATTING RULE: If the text or context involves 2 or more members eating or buying together, you MUST strictly format the note as: [Name] + [Name] + [Name]: [reason]. Use a space around the "+" and a colon ":" right before the reason.
+      * Right Example: "Bianca + Megan + Huck: phở"
+      * Right Example: "Huck + Megan: coffee"
+    - NO GUESSWORK & NO AUTOMATIC NAMES: If there are NO member names on the bill (only random transaction codes, machine-generated numbers, internet banking automatic codes, or POS terminal IDs like Highlands/Starbucks codes), do NOT guess any names, and NEVER automatically insert "Megan", "Bianca", or the uploader's name ("${userSelected}") into the note. Just output the isolated merchant name/item (e.g., "Highlands", "Starbucks", "Grab") if there is a brand name. If it contains ONLY pure machine codes with no recognizable brand or food purpose, leave it completely blank "" so the user can manually fill it later.
+    - DO NOT CHANGE TO UPLOADER FOR NOTE: Never blindly replace the actual names involved on the bill with the uploader's name ("${userSelected}") if the bill clearly indicates another member.
+    - STRICT SECURITY CHOP: NEVER include the member's real Vietnamese names from the screenshot (like "Duong Quynh Huong", "Nguyen Thuy Linh", "Duong Minh Giang", etc.). ONLY use the short mapped names ("Megan", "Bianca", "Huck", "Lisa", "Treasury").
 
 11. method: "Bank" for app/transfer, "Cash" for cash.
 
