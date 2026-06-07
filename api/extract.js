@@ -68,11 +68,12 @@ Strict Business Rules:
    - If it is a regular daily purchase or individual meal, leave this field as an empty string "".
 
 10. note: Fill this with the mapped name of the members involved + specific item/reason (e.g., "Megan bún riêu").
-    - KEEP THE ORIGINAL NAMES: Just keep the names exactly as they appear in the transaction text. If they are in Vietnamese, always convert them to their short English mapped names ("Megan", "Bianca", "Huck", "Lisa").
+    - MAP REAL NAMES TO SHORT NAMES: Look at the names in the transaction text or sender name. ALWAYS convert them to their short English mapped names ("Megan", "Bianca", "Huck", "Lisa", "Treasury") using the rules from Rule 6.
+    - CRITICAL FOR INCOME/CONTRIBUTIONS: If the transaction is "Income" and the sender is "Duong Quynh Huong", the note MUST contain be "Bianca đóng quỹ" (or the reason shown). NEVER write "Duong Minh Giang" or "Lisa" here just because she is the uploader or the recipient.
     - MULTIPLE MEMBERS: If the text mentions multiple people (e.g., "bianca + megan + Huck phở", "Huck Megan coffee"), include ALL of them separated by a plus sign "+".
     - NO GUESSWORK & NO CODES: If there are NO member names on the bill (random transaction codes, machine-generated numbers, or POS terminal IDs), do NOT guess or add any member names like "Bianca". Just output the mapped item/reason (e.g., "BMTT") and ignore the random POS codes.
-    - DO NOT CHANGE TO UPLOADER: Never replace the names on the bill with the uploader's name ("${userSelected}").
-    - NEVER include the member's real Vietnamese names from the screenshot (like "Duong Quynh Huong", "Nguyen Thuy Linh", etc.) or any outside stranger's name here. ONLY use the short mapped names ("Megan", "Bianca", "Huck", "Lisa").
+    - DO NOT CHANGE TO UPLOADER FOR NOTE: Never blindly replace the actual names involved on the bill with the uploader's name ("${userSelected}") if the bill clearly indicates another member.
+    - STRICT SECURITY CHOP: NEVER include the member's real Vietnamese names from the screenshot (like "Duong Quynh Huong", "Nguyen Thuy Linh", "Duong Minh Giang", etc.) or any outside stranger's name here. ONLY use the short mapped names ("Megan", "Bianca", "Huck", "Lisa", "Treasury").
 
 11. method: "Bank" for app/transfer, "Cash" for cash.
 
