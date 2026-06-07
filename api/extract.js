@@ -69,14 +69,21 @@ Strict Business Rules:
 
 10. note: Fill this with the mapped name of the members involved + specific item/reason (e.g., "Megan bún riêu").
     - MAP REAL NAMES TO SHORT NAMES: Look at the names in the transaction text, sender name, or recipient name. ALWAYS convert them to their short English mapped names ("Megan", "Bianca", "Huck", "Lisa", "Treasury") using the rules from Rule 6. 
-    - NO STRANGER OR RECIPIENT NAMES: NEVER include the real Vietnamese name of an outside stranger or shop owner from the bill (such as "Tran Trung Cang", "Nguyen Van A", etc.) inside the note. ONLY map names if they belong to your group members.
+    - MERCHANT BRAND MEMORY & COMPANY MAPPING: If the recipient name or transaction text mentions corporate or legal merchant names, map them immediately to their brand names and include them in the note:
+      * "TNHH NGUYEN NHI" or "NGUYEN NHI" -> MUST output "BMTT" (Bánh mì thảnh thơi). Do NOT treat this as an individual stranger's name, keep it!
+      * "Baci" -> MUST output "Baci coffee".
+      * "Cong ty moon dining" -> MUST output "coffee moon dining".
+      * "Tran Trung Cang" -> MUST output "vé Sinh cafe (xe buýt)".
+      * "Cong ty tnhh tai minh khang" -> MUST output "Bon Bon".
+      * "McDonalds" -> MUST output "McDonalds".
+    - NO STRANGER PERSONAL NAMES: NEVER include the real Vietnamese personal name of an outside individual stranger or shop owner (such as "Nguyen Van A", "Tran Thi B", etc.) inside the note. Only group member short names, recognized brand names (like BMTT, McDonalds, Highlands), or item purposes are allowed.
     - CRITICAL FOR INCOME/CONTRIBUTIONS: If the transaction is "Income" and the sender is "Duong Quynh Huong", the note MUST be "Bianca đóng quỹ" (or the reason shown). NEVER write "Duong Minh Giang" or "Lisa" here just because she is the uploader or the recipient.
     - MULTIPLE MEMBERS FORMATTING RULE: If the text or context involves 2 or more members eating or buying together, you MUST strictly format the note as: [Name] + [Name] + [Name]: [reason]. Use a space around the "+" and a colon ":" right before the reason.
       * Right Example: "Bianca + Megan + Huck: phở"
       * Right Example: "Huck + Megan: coffee"
-    - NO GUESSWORK & NO AUTOMATIC NAMES: If there are NO member names on the bill (only random transaction codes, machine-generated numbers, internet banking automatic codes, or POS terminal IDs like Highlands/Starbucks codes), do NOT guess any names, and NEVER automatically insert "Megan", "Bianca", or the uploader's name ("${userSelected}") into the note. Just output the isolated merchant name/item (e.g., "Highlands", "Starbucks", "Grab") if there is a brandname or leave it completely blank "" so the user can manually fill the member's name later.
+    - NO GUESSWORK & NO AUTOMATIC NAMES: If there are NO member names on the bill (only random transaction codes, machine-generated numbers, internet banking automatic codes, or POS terminal IDs like Highlands/Starbucks codes), do NOT guess any names, and NEVER automatically insert "Megan", "Bianca", or the uploader's name ("${userSelected}") into the note. Just output the isolated merchant name/item (e.g., "Highlands", "Starbucks", "Grab") if there is a brand name. If it contains ONLY pure machine codes with no recognizable brand or food purpose, leave it completely blank "" so the user can manually fill it later.
     - DO NOT CHANGE TO UPLOADER FOR NOTE: Never blindly replace the actual names involved on the bill with the uploader's name ("${userSelected}") if the bill clearly indicates another member.
-    - STRICT SECURITY CHOP: NEVER include the member's real Vietnamese names from the screenshot (like "Duong Quynh Huong", "Nguyen Thuy Linh", "Duong Minh Giang", etc.) or any outside stranger's name here. ONLY use the short mapped names ("Megan", "Bianca", "Huck", "Lisa", "Treasury").
+    - STRICT SECURITY CHOP: NEVER include the member's real Vietnamese names from the screenshot (like "Duong Quynh Huong", "Nguyen Thuy Linh", "Duong Minh Giang", etc.). ONLY use the short mapped names ("Megan", "Bianca", "Huck", "Lisa", "Treasury").
 
 11. method: "Bank" for app/transfer, "Cash" for cash.
 
