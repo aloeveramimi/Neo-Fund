@@ -26,17 +26,27 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'GOOGLE_CLIENT_EMAIL or GOOGLE_PRIVATE_KEY not set in environment.' });
   }
 
-  // Tự động phân loại xem dữ liệu này cần ghi vào những tab nào dựa trên "userSelected"
+// Tự động phân loại xem dữ liệu này cần ghi vào những tab nào dựa trên "userSelected"
   let sheetsToAppend = [];
   let targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${GID_MEMBER}`; // Mặc định trả link tab Member
 
+  // Đọc dữ liệu từ AI trích xuất để hỗ trợ phân luồng
+  const txType = row[3]; // Cột Type (Income, Expense,...)
+
   if (userSelected === 'Treasury') {
-    // Nếu Thủ quỹ up bill, ghi vào tab Treasury và trả về link dẫn trực tiếp đến tab Treasury luôn
-    sheetsToAppend.push('Treasury');
+    // Nếu Thủ quỹ up bill
+    if (txType === 'Income') {
+      // Nếu là bill đóng quỹ (Income) mà Thủ quỹ up hộ, bắt buộc phải ghi vào cả 2 bên (mỗi bên 1 lần)
+      sheetsToAppend = ['Treasury', 'Member'];
+    } else {
+      // Các khoản chi tiêu thông thường của Treasury thì chỉ ghi vào Treasury
+      sheetsToAppend = ['Treasury'];
+    }
     targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${GID_TREASURY}`;
   } else {
-    // Nếu là thành viên khác (Megan, Bianca, Huck...) up bill, mặc định ghi vào tab Member
-    sheetsToAppend.push('Member');
+    // Nếu là thành viên khác (Megan, Bianca, Huck...) up bill, mặc định chỉ ghi vào tab Member
+    sheetsToAppend = ['Member'];
+    targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${GID_MEMBER}`;
   }
 
   try {
