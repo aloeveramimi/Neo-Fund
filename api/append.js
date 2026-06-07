@@ -7,11 +7,10 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  // Nhận dữ liệu gửi từ Frontend lên, bốc thêm biến userSelected (Nút "I am" mọi người chọn)
-  const { row, userSelected } = req.body;
+  // Nhận dữ liệu gửi từ Frontend lên, bốc thêm biến "sheetName" do vòng lặp Frontend chỉ định
+  const { row, userSelected, sheetName } = req.body;
 
-  // 1. CẤU HÌNH CỨNG MÃ GID CỦA FILE GOOGLE SHEETS CỦA BẠN VÀO ĐÂY
-  // (Bạn mở Sheet lên, bấm vào từng tab rồi copy dãy số sau chữ gid= trên đường link URL nha)
+  // 1. CẤU HÌNH CỨNG MÃ GID CỦA FILE GOOGLE SHEETS
   const GID_MEMBER = "1444019689"; 
   const GID_TREASURY = "0";
 
@@ -26,27 +25,22 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'GOOGLE_CLIENT_EMAIL or GOOGLE_PRIVATE_KEY not set in environment.' });
   }
 
-// Tự động phân loại xem dữ liệu này cần ghi vào những tab nào dựa trên "userSelected"
+  // 🎯 LUỒNG PHÂN LUỒNG NGHE LỜI FRONTEND TUYỆT ĐỐI:
   let sheetsToAppend = [];
-  let targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${GID_MEMBER}`; // Mặc định trả link tab Member
+  let targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${GID_MEMBER}`; 
 
-  // Đọc dữ liệu từ AI trích xuất để hỗ trợ phân luồng
-  const txType = row[3]; // Cột Type (Income, Expense,...)
-
-  if (userSelected === 'Treasury') {
-    // Nếu Thủ quỹ up bill
-    if (txType === 'Income') {
-      // Nếu là bill đóng quỹ (Income) mà Thủ quỹ up hộ, bắt buộc phải ghi vào cả 2 bên (mỗi bên 1 lần)
-      sheetsToAppend = ['Treasury', 'Member'];
-    } else {
-      // Các khoản chi tiêu thông thường của Treasury thì chỉ ghi vào Treasury
-      sheetsToAppend = ['Treasury'];
-    }
-    targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${GID_TREASURY}`;
+  if (sheetName) {
+    // Nếu Frontend chạy vòng lặp và chỉ định đích danh tab cần ghi ('Member' hoặc 'Treasury')
+    sheetsToAppend.push(sheetName);
+    targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${sheetName === 'Treasury' ? GID_TREASURY : GID_MEMBER}`;
   } else {
-    // Nếu là thành viên khác (Megan, Bianca, Huck...) up bill, mặc định chỉ ghi vào tab Member
-    sheetsToAppend = ['Member'];
-    targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${GID_MEMBER}`;
+    // Luồng dự phòng nếu sau này có giao dịch đơn lẻ nào không truyền sheetName
+    if (userSelected === 'Treasury') {
+      sheetsToAppend.push('Treasury');
+      targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${GID_TREASURY}`;
+    } else {
+      sheetsToAppend.push('Member');
+    }
   }
 
   try {
@@ -62,7 +56,7 @@ export default async function handler(req, res) {
     const tokenResponse = await client.getAccessToken();
     const accessToken = tokenResponse.token;
 
-    // Vòng lặp ghi dữ liệu vào các tab đã phân loại ở trên
+    // Vòng lặp ghi dữ liệu (Lúc này chỉ có đúng 1 tab được chỉ định từ Frontend)
     for (const name of sheetsToAppend) {
       const range = encodeURIComponent(`${name}!A1`);
       const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
@@ -80,7 +74,7 @@ export default async function handler(req, res) {
       if (data.error) return res.status(500).json({ error: data.error.message });
     }
 
-    // TRẢ KẾT QUẢ VỀ FRONTEND KÈM THEO ĐƯỜNG LINK ĐỘNG THEO USER 
+    // TRẢ KẾT QUẢ VỀ FRONTEND KÈM THEO ĐƯỜNG LINK ĐỘNG THEO LUỒNG GIAO DỊCH
     return res.status(200).json({ 
       ok: true,
       sheetUrl: targetUrl 
