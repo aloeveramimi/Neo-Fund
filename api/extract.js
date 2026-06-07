@@ -27,11 +27,9 @@ Strict Business Rules:
    - If a member is buying something or paying for general things -> Set type to "Expense".
 3. from: One of ${JSON.stringify(FROMS)}. (STRICT: "External" is NOT allowed in this field).
 - DEFAULT RULE: The "from" field MUST MATCH the person uploading this screenshot ("${userSelected || 'Unknown'}").
-- INCOME NOTE: If the transaction is clearly a fund contribution or deposit (Income), AI MUST look closely at the screenshot. 
-  + If the receiver account is TPBank with account number "00004425830" (or registered under names like "Duong Minh Giang", "Miami Yogurt"), this is a transfer INTO the Treasury fund. In this case, AI MUST identify the actual sender/depositor from the receipt and map it to their short name (e.g., "Duong Quynh Huong" -> "Bianca", "Do Quang Hoc" -> "Huck"). 
-- EXPENSE NOTE: If it is an Expense (paying for meals, drinks, coffee), the "from" field MUST strictly remain "${userSelected}". Even if other member names appear in the transfer text because they ate together, DO NOT change the "from" field to those names.
+
 4. to: One of ${JSON.stringify(TOS)}.
-   - If money is coming into the fund account -> "to" MUST be "Treasury".
+   - If money is coming into the fund account, the receiver account is TPBank with account number "00004425830" -> "to" MUST be "Treasury".
    - If money is spent at a public shop/vendor -> "to" MUST be "External".
 5. amount: Plain integer only, no currency symbols, no dots, no commas (e.g. 35000).
 
