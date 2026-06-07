@@ -229,14 +229,13 @@ async function submitRow(){
     targetSheets = [(role === 'Treasury') ? 'Treasury' : 'Member']; 
   }
 
-  let lastSheetUrl = ""; // Hứng đường link từ Backend trả về
+  let lastSheetUrl = ""; // Hứng đường link dòng chính xác từ Backend trả về
 
   try {
     for (let sheetName of targetSheets) {
       const res = await fetch('/api/append',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        // Gửi mảng kèm userSelected lên để Backend bốc mã gid tương ứng
         body:JSON.stringify({sheetName, row:rowVals, userSelected: role})
       });
       const data = await res.json();
@@ -245,15 +244,16 @@ async function submitRow(){
         document.getElementById('subBtn').disabled=false;
         return;
       }
+      // Lưu lại link của đợt chạy cuối để làm nút điều hướng
       if(data.sheetUrl) lastSheetUrl = data.sheetUrl;
     }
     
-    // ĐỔ NÚT BẤM MÀU XANH SIÊU ĐẸP RA PHẦN THÔNG BÁO THÀNH CÔNG
+    // ĐỔ NÚT BẤM DẪN THẲNG ĐẾN TỌA ĐỘ DÒNG VỪA CHÈN
     setStatus(`
       <div style="text-align: center; padding: 4px 0;">
         <p style="margin-bottom: 10px; font-weight: 600;">🎉 Đã thêm thành công vào Google Sheet!</p>
         <a href="${lastSheetUrl}" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #107c41; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
-           📊 Vào Google Sheets kiểm tra ngay
+           📊 Đến thẳng dòng vừa chèn kiểm tra ngay
         </a>
       </div>
     `,'ss');
