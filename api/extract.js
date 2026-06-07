@@ -69,7 +69,7 @@ Strict Business Rules:
 
 10. note: Fill this with the mapped name of the members involved + specific item/reason (e.g., "Megan bún riêu").
     - MAP REAL NAMES TO SHORT NAMES: Look at the names in the transaction text, sender name, or recipient name. ALWAYS convert them to their short English mapped names ("Megan", "Bianca", "Huck", "Lisa", "Treasury") using Rule 6. 
-    - CRITICAL FOR INCOME/CONTRIBUTIONS: If the transaction is "Income" and the sender is "Duong Quynh Huong", the note MUST be exactly "Bianca đóng quỹ". NEVER write "Duong Minh Giang" or "Lisa" here.
+    - CRITICAL FOR INCOME/CONTRIBUTIONS: NEVER write "Duong Minh Giang" or "Lisa", the treasurer's name here. 
     - MULTIPLE MEMBERS FORMATTING RULE: If the text involves 2 or more members eating or buying together, you MUST strictly format the note as: [Name] + [Name]: [reason] (e.g., "Bianca + Megan: phở", "Huck + Megan: coffee"). Use spaces around "+" and a colon ":" right before the reason.
     - NO GUESSWORK & NO STRANGER NAMES: If there are NO member names on the bill (only random machine codes, transaction numbers, or terminal IDs), do NOT guess, and NEVER automatically insert the uploader's name ("${userSelected}") or unmapped stranger personal names (like "le boi", "tran trung cang"). 
     - MERCHANTS & BRAND NAMES: If there is no member name but a prominent commercial brand (like "Highlands Coffee", "McDonalds") or a company name mapped in Rule 7 (like "NGUYEN NHI" which maps to "BMTT"), output ONLY that mapped brand name (e.g., "Highlands Coffee", "BMTT"). If it contains ONLY pure machine codes with no brand or purpose, leave it completely blank "".
