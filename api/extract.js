@@ -65,14 +65,15 @@ Strict Business Rules:
    - ONLY fill this field if the transaction is a MAJOR, PERIODIC, or FIXED budget item for the week or month (e.g., "Tiền nhà tháng 5", "Tiền điện tháng 5", "Tiền nước tháng 5", "Tiền lãi tháng 5", "Tiền buff tuần 1", "Tiền quỹ tuần").
    - If it is a regular daily purchase or individual meal, leave this field as an empty string "".
 
-10. note: Fill this with the mapped name of the members involved + specific item/reason (e.g., "Megan bún riêu").
-    - SPECIAL RULE FOR ADVANCE/REIMBURSEMENT: If Type is "Advance & Reimbursement", output ONLY "Treasury to [Member Name]".
-    - MAP REAL NAMES TO SHORT NAMES: Look at the names in the transaction text, sender name, or recipient name. ALWAYS convert them to their short English mapped names ("Megan", "Bianca", "Huck", "Lisa", "Treasury") using Rule 6. 
-    - CRITICAL FOR INCOME/CONTRIBUTIONS: NEVER write "Duong Minh Giang" or "Lisa", the treasurer's name here. 
-    - MULTIPLE MEMBERS FORMATTING RULE: If the text involves 2 or more members eating or buying together, you MUST strictly format the note as: [Name] + [Name]: [reason] (e.g., "Bianca + Megan: phở", "Huck + Megan: coffee"). Use spaces around "+" and a colon ":" right before the reason.
-    - NO GUESSWORK & NO STRANGER NAMES: If there are NO member names on the bill (only random machine codes, transaction numbers, or terminal IDs), do NOT guess, and NEVER automatically insert the uploader's name ("${userSelected}") or unmapped stranger personal names (like "le boi", "tran trung cang"). 
-    - MERCHANTS & BRAND NAMES: If there is no member name but a prominent commercial brand (like "Highlands Coffee", "McDonalds") or a company name mapped in Rule 7 (like "NGUYEN NHI" which maps to "BMTT"), output ONLY that mapped brand name (e.g., "Highlands Coffee", "BMTT"). If it contains ONLY pure machine codes with no brand or purpose, leave it completely blank "".
-    - STRICT SECURITY CHOP: NEVER include the member's real Vietnamese names from the screenshot (like "Duong Quynh Huong", "Nguyen Thuy Linh", "Duong Minh Giang", etc.) or any individual stranger's name inside the final JSON output.
+10. note: STRICT EXTRACTION ORDER (Top-down priority):
+    - PRIORITY 1 (Advance & Reimbursement): If Type is "Advance & Reimbursement", output ONLY "Treasury to [Member Name]" 
+    - PRIORITY 2 (Members): Identify transfer description/content. If member names are found, format as: "[Mapped Name]: [reason]" or "[Name] + [Name]: [reason]". 
+      * STRICT SECURITY CHOP: ALWAYS map to short English names (Megan, Bianca, Huck, Lisa, Treasury) and NEVER include original Vietnamese real names.
+    - PRIORITY 3 (Brands & Merchants): If NO member names are found in the description:
+        * Look for known brands in Rule 7 (e.g., "BMTT", "McDonalds"). Output ONLY the mapped name.
+        * Look for famous global/local brands in the entire bill (e.g., "Highlands Coffee", "Starbucks", "Grab", "Circle K"). Output ONLY the brand name.
+    - PRIORITY 4 (Fallback): If text contains ONLY machine codes, terminal IDs, or transaction numbers, leave blank "".
+    
 11. method: "Bank" for app/transfer, "Cash" for cash.
 
 Output format:
