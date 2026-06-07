@@ -27,9 +27,8 @@ Strict Business Rules:
    - If a member is buying something or paying for general things -> Set type to "Expense".
 3. from: One of ${JSON.stringify(FROMS)}. (STRICT: "External" is NOT allowed in this field).
 - DEFAULT RULE: The "from" field MUST MATCH the person uploading this screenshot ("${userSelected || 'Unknown'}").
-- CRITICAL EXCEPTION FOR INCOME: If the transaction is clearly a fund contribution or deposit (Income), AI MUST look closely at the screenshot. 
+- INCOME NOTE: If the transaction is clearly a fund contribution or deposit (Income), AI MUST look closely at the screenshot. 
   + If the receiver account is TPBank with account number "00004425830" (or registered under names like "Duong Minh Giang", "Miami Yogurt"), this is a transfer INTO the Treasury fund. In this case, AI MUST identify the actual sender/depositor from the receipt and map it to their short name (e.g., "Duong Quynh Huong" -> "Bianca", "Do Quang Hoc" -> "Huck"). 
-  + DO NOT blindly use "${userSelected}" for Income if "${userSelected}" is "Treasury", because the admin is just uploading on behalf of that member.
 - EXPENSE NOTE: If it is an Expense (paying for meals, drinks, coffee), the "from" field MUST strictly remain "${userSelected}". Even if other member names appear in the transfer text because they ate together, DO NOT change the "from" field to those names.
 4. to: One of ${JSON.stringify(TOS)}.
    - If money is coming into the fund account -> "to" MUST be "Treasury".
@@ -41,7 +40,7 @@ Strict Business Rules:
    - "Duong Quynh Huong" -> Bianca
    - "Do Quang Hoc" -> Huck
    - "Duong Minh Giang" OR "Miami Yogurt" OR "Lisa":
-     * IF the bank brand shown on the screenshot is "TPBank" -> Map exactly to "Treasury" (Official Fund Account).
+     * IF the bank brand shown on the screenshot is "TPBank" with account number "00004425830"-> Map exactly to "Treasury" (Official Fund Account).
      * IF the bank brand is ANY OTHER BANK (e.g. Vietcombank, Techcombank, MB Bank...) -> Map to "Lisa" (Personal Account).
 
 7. Brand Memory & Context Mapping Rules (Save short shop name to "note" and assign correct "category"):
