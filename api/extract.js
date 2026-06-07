@@ -76,6 +76,7 @@ Strict Business Rules:
       * "Tran Trung Cang" -> MUST output "vé Sinh cafe (xe buýt)".
       * "Cong ty tnhh tai minh khang" -> MUST output "Bon Bon".
       * "McDonalds" -> MUST output "McDonalds".
+      * "Highland coffee" -> MUST output "Highland coffee".
     - NO STRANGER PERSONAL NAMES: NEVER include the real Vietnamese personal name of an outside individual stranger or shop owner (such as "Nguyen Van A", "Tran Thi B", etc.) inside the note. Only group member short names, recognized brand names (like BMTT, McDonalds, Highlands), or item purposes are allowed.
     - CRITICAL FOR INCOME/CONTRIBUTIONS: If the transaction is "Income" and the sender is "Duong Quynh Huong", the note MUST be "Bianca đóng quỹ" (or the reason shown). NEVER write "Duong Minh Giang" or "Lisa" here just because she is the uploader or the recipient.
     - MULTIPLE MEMBERS FORMATTING RULE: If the text or context involves 2 or more members eating or buying together, you MUST strictly format the note as: [Name] + [Name] + [Name]: [reason]. Use a space around the "+" and a colon ":" right before the reason.
