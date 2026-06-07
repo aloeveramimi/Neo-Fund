@@ -66,6 +66,7 @@ Strict Business Rules:
    - If it is a regular daily purchase or individual meal, leave this field as an empty string "".
 
 10. note: Fill this with the mapped name of the members involved + specific item/reason (e.g., "Megan bún riêu").
+    - SPECIAL RULE FOR ADVANCE/REIMBURSEMENT: If Type is "Advance & Reimbursement", output ONLY "Treasury to [Member Name]".
     - MAP REAL NAMES TO SHORT NAMES: Look at the names in the transaction text, sender name, or recipient name. ALWAYS convert them to their short English mapped names ("Megan", "Bianca", "Huck", "Lisa", "Treasury") using Rule 6. 
     - CRITICAL FOR INCOME/CONTRIBUTIONS: NEVER write "Duong Minh Giang" or "Lisa", the treasurer's name here. 
     - MULTIPLE MEMBERS FORMATTING RULE: If the text involves 2 or more members eating or buying together, you MUST strictly format the note as: [Name] + [Name]: [reason] (e.g., "Bianca + Megan: phở", "Huck + Megan: coffee"). Use spaces around "+" and a colon ":" right before the reason.
