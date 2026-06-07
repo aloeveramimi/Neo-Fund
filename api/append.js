@@ -7,7 +7,13 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).end();
 
-  const { sheetName = 'Log', row } = req.body;
+  // Nhận dữ liệu gửi từ Frontend lên, bốc thêm biến userSelected (Nút "I am" mọi người chọn)
+  const { row, userSelected } = req.body;
+
+  // 1. CẤU HÌNH CỨNG MÃ GID CỦA FILE GOOGLE SHEETS CỦA BẠN VÀO ĐÂY
+  // (Bạn mở Sheet lên, bấm vào từng tab rồi copy dãy số sau chữ gid= trên đường link URL nha)
+  const GID_MEMBER = "THAY_SỐ_GID_TAB_MEMBER_VÀO_ĐÂY"; 
+  const GID_TREASURY = "THAY_SỐ_GID_TAB_TREASURY_VÀO_ĐÂY";
 
   // Gọi mã ID từ biến môi trường Vercel ra xài
   const sheetId = process.env.SPREADSHEET_ID;
@@ -18,6 +24,19 @@ export default async function handler(req, res) {
 
   if (!clientEmail || !privateKey) {
     return res.status(500).json({ error: 'GOOGLE_CLIENT_EMAIL or GOOGLE_PRIVATE_KEY not set in environment.' });
+  }
+
+  // Tự động phân loại xem dữ liệu này cần ghi vào những tab nào dựa trên "userSelected"
+  let sheetsToAppend = [];
+  let targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${GID_MEMBER}`; // Mặc định trả link tab Member
+
+  if (userSelected === 'Treasury') {
+    // Nếu Thủ quỹ up bill, ghi vào tab Treasury và trả về link dẫn trực tiếp đến tab Treasury luôn
+    sheetsToAppend.push('Treasury');
+    targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${GID_TREASURY}`;
+  } else {
+    // Nếu là thành viên khác (Megan, Bianca, Huck...) up bill, mặc định ghi vào tab Member
+    sheetsToAppend.push('Member');
   }
 
   try {
@@ -33,21 +52,30 @@ export default async function handler(req, res) {
     const tokenResponse = await client.getAccessToken();
     const accessToken = tokenResponse.token;
 
-    const range = encodeURIComponent(`${sheetName}!A1`);
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+    // Vòng lặp ghi dữ liệu vào các tab đã phân loại ở trên
+    for (const name of sheetsToAppend) {
+      const range = encodeURIComponent(`${name}!A1`);
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
 
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}` 
-      },
-      body: JSON.stringify({ values: [row] })
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}` 
+        },
+        body: JSON.stringify({ values: [row] })
+      });
+
+      const data = await r.json();
+      if (data.error) return res.status(500).json({ error: data.error.message });
+    }
+
+    // TRẢ KẾT QUẢ VỀ FRONTEND KÈM THEO ĐƯỜNG LINK ĐỘNG THEO USER 
+    return res.status(200).json({ 
+      ok: true,
+      sheetUrl: targetUrl 
     });
 
-    const data = await r.json();
-    if (data.error) return res.status(500).json({ error: data.error.message });
-    return res.status(200).json({ ok: true });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }
