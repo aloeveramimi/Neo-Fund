@@ -8,10 +8,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
   // Nhận dữ liệu gửi từ Frontend lên, bốc thêm biến userSelected (Nút "I am" mọi người chọn)
-  const { row, userSelected } = req.body;
+  const { sheetName = 'Log', row, userSelected } = req.body;
 
-  // 1. CẤU HÌNH CỨNG MÃ GID CỦA FILE GOOGLE SHEETS CỦA BẠN VÀO ĐÂY
-  // (Bạn mở Sheet lên, bấm vào từng tab rồi copy dãy số sau chữ gid= trên đường link URL nha)
+  // Cấu hình cứng mã GID thực tế của bạn
   const GID_MEMBER = "1444019689"; 
   const GID_TREASURY = "0";
 
@@ -26,17 +25,10 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'GOOGLE_CLIENT_EMAIL or GOOGLE_PRIVATE_KEY not set in environment.' });
   }
 
-  // Tự động phân loại xem dữ liệu này cần ghi vào những tab nào dựa trên "userSelected"
-  let sheetsToAppend = [];
-  let targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${GID_MEMBER}`; // Mặc định trả link tab Member
-
-  if (userSelected === 'Treasury') {
-    // Nếu Thủ quỹ up bill, ghi vào tab Treasury và trả về link dẫn trực tiếp đến tab Treasury luôn
-    sheetsToAppend.push('Treasury');
-    targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${GID_TREASURY}`;
-  } else {
-    // Nếu là thành viên khác (Megan, Bianca, Huck...) up bill, mặc định ghi vào tab Member
-    sheetsToAppend.push('Member');
+  // Tự động chọn mã GID tương ứng theo sheetName đang chạy để ghép link dòng chuẩn xác
+  let currentGid = GID_MEMBER;
+  if (sheetName === 'Treasury') {
+    currentGid = GID_TREASURY;
   }
 
   try {
@@ -52,25 +44,35 @@ export default async function handler(req, res) {
     const tokenResponse = await client.getAccessToken();
     const accessToken = tokenResponse.token;
 
-    // Vòng lặp ghi dữ liệu vào các tab đã phân loại ở trên
-    for (const name of sheetsToAppend) {
-      const range = encodeURIComponent(`${name}!A1`);
-      const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+    const range = encodeURIComponent(`${sheetName}!A1`);
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
 
-      const r = await fetch(url, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}` 
-        },
-        body: JSON.stringify({ values: [row] })
-      });
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}` 
+      },
+      body: JSON.stringify({ values: [row] })
+    });
 
-      const data = await r.json();
-      if (data.error) return res.status(500).json({ error: data.error.message });
+    const data = await r.json();
+    if (data.error) return res.status(500).json({ error: data.error.message });
+
+    // --- LOGIC TRÍCH XUẤT TỌA ĐỘ DÒNG VỪA CHÈN ---
+    // Google API trả về dạng: "Member!A50:K50". Mình bốc dải ô đằng sau dấu "!" là "A50:K50"
+    let cellRange = "A1";
+    if (data.updates && data.updates.updatedRange) {
+      const parts = data.updates.updatedRange.split('!');
+      if (parts.length > 1) {
+        cellRange = parts[1]; // Lấy được tọa độ thực tế (ví dụ: A50:K50)
+      }
     }
 
-    // TRẢ KẾT QUẢ VỀ FRONTEND KÈM THEO ĐƯỜNG LINK ĐỘNG THEO USER 
+    // Ghép tọa độ dòng và mã GID của tab để tạo link động dẫn thẳng tầm mắt
+    const targetUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/edit#gid=${currentGid}&range=${cellRange}`;
+
+    // TRẢ KẾT QUẢ VỀ FRONTEND KÈM THEO ĐƯỜNG LINK ĐỘNG DẪN ĐẾN ĐÚNG DÒNG VỪA CHÈN
     return res.status(200).json({ 
       ok: true,
       sheetUrl: targetUrl 
