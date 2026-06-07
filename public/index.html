@@ -86,7 +86,7 @@ input:focus, select:focus { border-color: #7F77DD; }
 
 <script>
 const TYPES   = ['Income','Expense','Advance & Reimbursement','Adjustment'];
-const FROMS   = ['Treasury','Lisa','Bianca','Huck','Megan','TPBank']; // ĐÃ BỎ EXTERNAL KHỎI LIST FROM
+const FROMS   = ['Treasury','Lisa','Bianca','Huck','Megan','TPBank']; 
 const TOS     = ['Treasury','Lisa','Bianca','Huck','Megan','External'];
 const CATS    = ['Contribution','Groceries','Food and Drinks','Coffee','Rent','Utilities','Transport','Work','Emergency','Misc','Transfer','Reward','Fine','Health',"Huck's undefined expense"];
 const METHODS = ['Cash','Bank'];
@@ -131,26 +131,20 @@ function load(file){
   reader.onload = (event) => {
     const img = new Image();
     img.onload = () => {
-      // TỰ CHẾ CHẾ ĐỘ MID: ÉP ĐỘ PHÂN GIẢI VỀ MỨC VỪA ĐỦ ĐỌC
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       
-      // Đặt chiều rộng tiêu chuẩn lý tưởng cho OpenAI hệ High là 768px
       const TARGET_WIDTH = 768; 
       const scale = TARGET_WIDTH / img.width;
       
-      // Tính toán tỷ lệ chiều cao chạy theo để ảnh không bị bóp méo
       canvas.width = TARGET_WIDTH;
       canvas.height = img.height * scale;
       
-      // Vẽ ảnh thu nhỏ vào canvas
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
       
-      // Xuất chuỗi Base64 đã được nén giảm tải dung lượng pixel
-      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8); // Chất lượng 80% nét căng
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
       b64 = compressedDataUrl.split(',')[1];
       
-      // Hiển thị giao diện xem trước
       const p = document.getElementById('prev'); 
       p.src = compressedDataUrl; 
       p.style.display = 'block';
@@ -230,17 +224,20 @@ async function submitRow(){
   // LOGIC ĐỊNH TUYẾN TAB THÔNG MINH
   let targetSheets = [];
   if (ex.type === 'Income' || ex.type === 'Advance & Reimbursement') {
-    targetSheets = ['Member', 'Treasury']; // Ghi đồng thời vào cả 2 bảng
+    targetSheets = ['Member', 'Treasury']; 
   } else {
-    targetSheets = [(role === 'Treasury') ? 'Treasury' : 'Member']; // Chỉ ghi vào bảng của người up
+    targetSheets = [(role === 'Treasury') ? 'Treasury' : 'Member']; 
   }
+
+  let lastSheetUrl = ""; // Hứng đường link từ Backend trả về
 
   try {
     for (let sheetName of targetSheets) {
       const res = await fetch('/api/append',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({sheetName,row:rowVals})
+        // Gửi mảng kèm userSelected lên để Backend bốc mã gid tương ứng
+        body:JSON.stringify({sheetName, row:rowVals, userSelected: role})
       });
       const data = await res.json();
       if(data.error) {
@@ -248,8 +245,19 @@ async function submitRow(){
         document.getElementById('subBtn').disabled=false;
         return;
       }
+      if(data.sheetUrl) lastSheetUrl = data.sheetUrl;
     }
-    setStatus('✅ Đã thêm thành công vào Google Sheet!','ss');
+    
+    // ĐỔ NÚT BẤM MÀU XANH SIÊU ĐẸP RA PHẦN THÔNG BÁO THÀNH CÔNG
+    setStatus(`
+      <div style="text-align: center; padding: 4px 0;">
+        <p style="margin-bottom: 10px; font-weight: 600;">🎉 Đã thêm thành công vào Google Sheet!</p>
+        <a href="${lastSheetUrl}" target="_blank" style="display: inline-block; padding: 8px 16px; background-color: #107c41; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+           📊 Vào Google Sheets kiểm tra ngay
+        </a>
+      </div>
+    `,'ss');
+
   } catch(e) {
     setStatus('Lỗi: '+e.message,'se');
   }
