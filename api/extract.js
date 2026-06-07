@@ -46,7 +46,7 @@ Strict Business Rules:
    - Recipient "Baci" -> note MUST contain "Baci coffee", category is "Coffee".
    - Recipient "Cong ty moon dining" -> note MUST contain "coffee moon dining", category is "Coffee".
    - Recipient "Tran Trung Cang" -> note MUST contain "vé Sinh cafe (xe buýt)", category is "Transport".
-   - Recipient "Cong ty tnhh tai minh khang" -> note MUST contain "Bon Bon", category is "Food and Drinks" or "Coffee".
+   - Recipient "Cong ty tnhh tai minh khang" -> note MUST contain "Bon Bon", category is "Food and Drinks" if note includes "banh mi" or "Coffee" if note includes "sua"
    - Recipient "McDonalds" -> note MUST contain "McDonalds", category is "Food and Drinks".
    - Recipient "Go Da lat" AND amount is exactly 12300 -> note MUST contain "sữa để uống coffee", category is "Coffee".
    - If the screenshot shows a famous global/local merchant brand (e.g., "Highlands Coffee", "Starbucks", "Grab"), always extract that exact brand name as the merchant name.
@@ -55,9 +55,10 @@ Strict Business Rules:
 8. Category Rules by Type:
    - If type is "Income" -> category MUST be "Contribution".
    - If type is "Expense" -> category can be ['Groceries','Food and Drinks','Coffee','Rent','Utilities','Transport','Work','Emergency','Misc','Health',"Huck's undefined expense"].
-     * STRICTION FOR EXPENSE CATEGORIZATION (CRITICAL FOR FOOD):
+     * STRICTION FOR EXPENSE CATEGORIZATION (CRITICAL FOR FOOD& WORK):
      * If the transaction note/text mentions ready-to-eat snacks, cooked/boiled meals, street food, or immediate personal food (e.g., "khoai lang", "khoai luoc", "bun rieu", "banh canh", "com", "McDonalds") -> MUST categorize exactly as "Food and Drinks".
-     * If it mentions raw grocery items, market items, or raw ingredients for cooking (e.g., "mua rau", "thit", "trung", "di cho") -> MUST categorize as "Groceries".
+     * If it mentions raw grocery items, market items, or raw ingredients for cooking (e.g., "mua rau", "thit", "trung", "di cho", "Nuoc 5L") -> MUST categorize as "Groceries".
+     * If it mentions apparel, footwear, or clothing items (e.g., "quan ao", "giay", "shoes", "shirt") -> MUST categorize as "Work".
      * DO NOT lazily put food, snack, or meal items into "Misc". Only use "Misc" when the transaction truly does not fit any other option.
    - If type is "Advance & Reimbursement" -> category can be ['Transfer','Reward','Fine'].
 
