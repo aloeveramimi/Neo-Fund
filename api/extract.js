@@ -72,7 +72,8 @@ Strict Business Rules:
     - PRIORITY 3 (Brands & Merchants): If NO member names are found in the description:
         * Look for known brands in Rule 7 (e.g., "BMTT", "McDonalds"). Output ONLY the mapped name.
         * Look for famous global/local brands in the entire bill (e.g., "Highlands Coffee", "Starbucks", "Grab", "Circle K"). Output ONLY the brand name.
-    - PRIORITY 4 (Fallback): If text contains ONLY machine codes, terminal IDs, or transaction numbers, leave blank "".
+    - PRIORITY 4 (Stranger Filter): If the bill shows external recipient names (like "Le Boi", "Hoang Thi Thom"...) that do not match rule 7, DO NOT use these names in the note.
+    - PRIORITY 5 (Fallback): If text contains ONLY machine codes, terminal IDs, or transaction numbers, leave blank "".
     
 11. method: "Bank" for app/transfer, "Cash" for cash.
 
