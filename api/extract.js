@@ -35,20 +35,21 @@ Strict Business Rules:
 
 6. Name & Bank Mapping Rules (Convert real Vietnamese names from screenshot):
    - "Nguyen Thuy Linh" -> Megan
-   - "Duong Quynh Huong" -> Bianca
+   - "Duong Quynh Huong" OR "Lam Bao An"-> Bianca
    - "Do Quang Hoc" -> Huck
    - "Duong Minh Giang" OR "Miami Yogurt" OR "Lisa":
      * IF the bank brand shown on the screenshot is "TPBank" with account number "00004425830"-> Map exactly to "Treasury" (Official Fund Account).
      * IF the bank brand is ANY OTHER BANK (e.g. Vietcombank, Techcombank, MB Bank...) -> Map to "Lisa" (Personal Account).
 
 7. Brand Memory & Context Mapping Rules (Save short shop name to "note" and assign correct "category"):
-   - Recipient "Cong ty TNHH thuc pham Nguyen Nhi" -> note MUST contain "BMTT (bánh mì thảnh thơi)", category is "Coffee".
+   - Recipient/Account "7888778899" OR "Cong ty TNHH thuc pham Nguyen Nhi" -> note MUST contain "BMTT (bánh mì thảnh thơi)", category is "Coffee".
    - Recipient "Baci" -> note MUST contain "Baci coffee", category is "Coffee".
    - Recipient "Cong ty moon dining" -> note MUST contain "coffee moon dining", category is "Coffee".
    - Recipient "Tran Trung Cang" -> note MUST contain "vé Sinh cafe (xe buýt)", category is "Transport".
    - Recipient "Cong ty tnhh tai minh khang" -> note MUST contain "Bon Bon", category is "Food and Drinks" if note includes "banh mi" or "Coffee" if note includes "sua"
    - Recipient "McDonalds" -> note MUST contain "McDonalds", category is "Food and Drinks".
    - Recipient "Go Da lat" AND amount is exactly 12300 -> note MUST contain "sữa để uống coffee", category is "Coffee".
+   - Recipient "Hoang Thi Thom" -> note MUST contain "khoai lang", category is "Food and Drinks".
    - If the screenshot shows a famous global/local merchant brand (e.g., "Highlands Coffee", "Starbucks", "Grab"), always extract that exact brand name as the merchant name.
    - If the transaction text/context mentions "atiso" or "langfarm" and is related to "Huck" (e.g., uploaded by Huck, context for Huck) , category is "Health".
 
