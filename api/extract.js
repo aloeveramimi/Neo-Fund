@@ -72,7 +72,7 @@ Strict Business Rules:
 
 10. note: STRICT EXTRACTION ORDER (Top-down priority):
     - PRIORITY 1 (Advance & Reimbursement): If Type is "Advance & Reimbursement", output ONLY "Treasury to [Member Name]" 
-    - PRIORITY 2 (Members): Identify transfer description/content. If member names are found, format as: "[Mapped Name]: [reason]" or "[Name] + [Name]: [reason] + [brand]". (brand is optional)
+    - PRIORITY 2 (Members): Identify transfer description/content. If member names are found, format as: "[Mapped Name]: [reason]" or "[Name] + [Name]: [reason]". 
       * STRICT SECURITY CHOP: ALWAYS map to short English names (Megan, Bianca, Huck, Lisa, Treasury) and NEVER include original Vietnamese real names.
     - PRIORITY 3 (Brands & Merchants): If NO member names are found in the description:
         * Look for known brands in Rule 7 (e.g., "BMTT", "McDonalds"). Output ONLY the mapped name.
