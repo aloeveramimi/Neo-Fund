@@ -46,7 +46,9 @@ Strict Business Rules:
    - Recipient "Baci" -> note MUST contain "Baci coffee", category is "Coffee".
    - Recipient "Cong ty moon dining" -> note MUST contain "coffee moon dining", category is "Coffee".
    - Recipient "Tran Trung Cang" -> note MUST contain "vé Sinh cafe (xe buýt)", category is "Transport".
-   - Recipient "Cong ty tnhh tai minh khang" -> note MUST contain "Bon Bon", category is "Food and Drinks" if note includes "banh mi" or "Coffee" if note includes "sua"
+   - Recipient "Cong ty tnhh tai minh khang" -> note MUST contain "Bon Bon" AND:
+    * IF amount is exactly 13000 or 23000 -> note is "Huck: sữa".
+    * category is "Food and Drinks" if note includes "bánh mì" or "Coffee" if note includes "sữa".
    - Recipient "McDonalds" -> note MUST contain "McDonalds", category is "Food and Drinks".
    - Recipient "Go Da lat" AND amount is exactly 12300 -> note MUST contain "sữa để uống coffee", category is "Coffee".
    - Recipient "Hoang Thi Thom" -> note MUST contain "khoai lang", category is "Food and Drinks".
