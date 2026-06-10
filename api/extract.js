@@ -47,7 +47,7 @@ Strict Business Rules:
    - Recipient "Cong ty moon dining" -> note MUST contain "coffee moon dining", category is "Coffee".
    - Recipient "Tran Trung Cang" -> note MUST contain "vé Sinh cafe (xe buýt)", category is "Transport".
    - Recipient "Cong ty tnhh tai minh khang" -> note MUST contain "Bon Bon" AND:
-    * IF amount is exactly 13000 or 23000 -> note is "Huck: sữa".
+    * IF amount is exactly 13000 or 23000 -> note is "Huck: sữa Bonbon".
     * category is "Food and Drinks" if note includes "bánh mì" or "Coffee" if note includes "sữa".
    - Recipient "McDonalds" -> note MUST contain "McDonalds", category is "Food and Drinks".
    - Recipient "Go Da lat" AND amount is exactly 12300 -> note MUST contain "sữa để uống coffee", category is "Coffee".
@@ -72,7 +72,7 @@ Strict Business Rules:
 
 10. note: STRICT EXTRACTION ORDER (Top-down priority):
     - PRIORITY 1 (Advance & Reimbursement): If Type is "Advance & Reimbursement", output ONLY "Treasury to [Member Name]" 
-    - PRIORITY 2 (Members): Identify transfer description/content. If member names are found, format as: "[Mapped Name]: [reason]" or "[Name] + [Name]: [reason]". 
+    - PRIORITY 2 (Members): Identify transfer description/content. If member names are found, format as: "[Mapped Name]: [reason]" or "[Name] + [Name]: [reason] + [brand]". (brand is optional)
       * STRICT SECURITY CHOP: ALWAYS map to short English names (Megan, Bianca, Huck, Lisa, Treasury) and NEVER include original Vietnamese real names.
     - PRIORITY 3 (Brands & Merchants): If NO member names are found in the description:
         * Look for known brands in Rule 7 (e.g., "BMTT", "McDonalds"). Output ONLY the mapped name.
