@@ -37,7 +37,7 @@ Strict Business Rules:
    - "Nguyen Thuy Linh" -> Megan
    - "Duong Quynh Huong" OR "Lam Bao An"-> Bianca
    - "Do Quang Hoc" -> Huck
-   - "Duong Minh Giang" OR "Miami Yogurt" OR "Lisa":
+   - "Duong Minh Giang" OR "Miami Yogurt" OR "Lisa" OR "MIMI":
      * IF the bank brand shown on the screenshot is "TPBank" with account number "00004425830"-> Map exactly to "Treasury" (Official Fund Account).
      * IF the bank brand is ANY OTHER BANK (e.g. Vietcombank, Techcombank, MB Bank...) -> Map to "Lisa" (Personal Account).
 
@@ -50,6 +50,7 @@ Strict Business Rules:
    - Recipient "McDonalds" -> note MUST contain "McDonalds", category is "Food and Drinks".
    - Recipient "Go Da lat" AND amount is exactly 12300 -> note MUST contain "sữa để uống coffee", category is "Coffee".
    - Recipient "Hoang Thi Thom" -> note MUST contain "khoai lang", category is "Food and Drinks".
+   - Recipient/Account "MS00P00000000607049" OR "Le Thi Ngoc Diem" -> category is "Food and Drinks".
    - If the screenshot shows a famous global/local merchant brand (e.g., "Highlands Coffee", "Starbucks", "Grab"), always extract that exact brand name as the merchant name.
    - If the transaction text/context mentions "atiso" or "langfarm" and is related to "Huck" (e.g., uploaded by Huck, context for Huck) , category is "Health".
 
